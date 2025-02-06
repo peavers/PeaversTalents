@@ -39,7 +39,7 @@ local function CreateExportDialog()
     -- Create tabs
     dialog.Tabs[1] = UIComponents.CreateTab(dialog, 1, "Archon")
     dialog.Tabs[2] = UIComponents.CreateTab(dialog, 2, "Wowhead")
-    dialog.Tabs[3] = UIComponents.CreateTab(dialog, 3, "Icey Veins")
+    dialog.Tabs[3] = UIComponents.CreateTab(dialog, 3, "Icy Veins")
 
     PanelTemplates_SetNumTabs(dialog, 3)
     PanelTemplates_SetTab(dialog, 1)
