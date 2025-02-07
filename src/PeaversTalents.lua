@@ -73,11 +73,11 @@ local function CreateExportDialog()
         local classID, specID = Utils.GetPlayerClassAndSpec()
 
         -- Update Archon dropdowns
-        if #DataManager.GetAvailableEntries(addon.dungeonTalents, classID, specID) > 0 then
+        if #DataManager.GetAvailableEntries(addon.ArchonMythicDB, classID, specID) > 0 then
             UIDropDownMenu_Initialize(dialog.mplusDropdown, addon.DropdownManager.InitializeArchonMythicDropdown)
         end
 
-        if #DataManager.GetAvailableEntries(addon.raidTalents, classID, specID) > 0 then
+        if #DataManager.GetAvailableEntries(addon.ArchonRaidDB, classID, specID) > 0 then
             UIDropDownMenu_Initialize(dialog.raidDropdown, addon.DropdownManager.InitializeArchonRaidDropdown)
         end
 

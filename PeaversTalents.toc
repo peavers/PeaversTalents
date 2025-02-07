@@ -5,11 +5,11 @@
 ## Version: 1.1.5
 ## X-Curse-Project-ID: 1184820
 
-src/Data/RaidTalentData.lua
-src/Data/DungeonTalentData.lua
-src/Data/WowheadMiscDB.lua
+src/Data/ArchonMythicDB.lua
+src/Data/ArchonRaidDB.lua
 src/Data/WowheadMythicDB.lua
 src/Data/WowheadRaidDB.lua
+src/Data/WowheadMiscDB.lua
 
 src/Core/Config.lua
 src/Core/DataManager.lua
