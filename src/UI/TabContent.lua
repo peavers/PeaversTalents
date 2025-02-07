@@ -47,7 +47,7 @@ function TabContent.CreateArchonTab(dialog, tab)
 
 	local instructionsText = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 	instructionsText:SetPoint("BOTTOM", tab, "BOTTOM", 0, 55)
-	instructionsText:SetText("Select a build to copy the latest talent string | Builds as of " .. Utils.GetFormattedLocalTime(addon.dungeonTalents.updated))
+	instructionsText:SetText("Select a build to copy the latest talent string | Builds as of " .. Utils.GetFormattedLocalTime(addon.ArchonMythicDB.updated))
 	instructionsText:SetJustifyH("CENTER")
 end
 
@@ -102,7 +102,7 @@ function TabContent.CreateWowheadTab(dialog, tab)
 
 	local instructionsText = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 	instructionsText:SetPoint("BOTTOM", tab, "BOTTOM", 0, 55)
-	instructionsText:SetText("Select a build to copy the latest talent string | Builds as of " .. Utils.GetFormattedLocalTime(addon.dungeonTalents.updated))
+	instructionsText:SetText("Select a build to copy the latest talent string | Builds as of " .. Utils.GetFormattedLocalTime(addon.WowheadMythicDB.updated))
 	instructionsText:SetJustifyH("CENTER")
 end
 

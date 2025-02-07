@@ -38,11 +38,11 @@ local function InitializeDropdown(self, level, database, editBox, talentsKey)
 end
 
 function DropdownManager.InitializeArchonMythicDropdown(self, level)
-	InitializeDropdown(self, level, addon.dungeonTalents, addon.exportDialog.mplusEdit, "talentString")
+	InitializeDropdown(self, level, addon.ArchonMythicDB, addon.exportDialog.mplusEdit, "talentString")
 end
 
 function DropdownManager.InitializeArchonRaidDropdown(self, level)
-	InitializeDropdown(self, level, addon.raidTalents, addon.exportDialog.raidEdit, "talentString")
+	InitializeDropdown(self, level, addon.ArchonRaidDB, addon.exportDialog.raidEdit, "talentString")
 end
 
 function DropdownManager.InitializeWowheadMythicDropdown(self, level)
