@@ -57,4 +57,16 @@ function DropdownManager.InitializeWowheadMiscDropdown(self, level)
 	InitializeDropdown(self, level, addon.WowheadMiscDB, addon.exportDialog.wowheadMiscEdit, "talentString")
 end
 
+function DropdownManager.InitializeIcyVeinsMythicDropdown(self, level)
+	InitializeDropdown(self, level, addon.IcyVeinsMythicDB, addon.exportDialog.icyveinsMplusEdit, "talentString")
+end
+
+function DropdownManager.InitializeIcyVeinsRaidDropdown(self, level)
+	InitializeDropdown(self, level, addon.IcyVeinsRaidDB, addon.exportDialog.icyveinsRaidEdit, "talentString")
+end
+
+function DropdownManager.InitializeIcyVeinsMiscDropdown(self, level)
+	InitializeDropdown(self, level, addon.IcyVeinsMiscDB, addon.exportDialog.icyveinsMiscEdit, "talentString")
+end
+
 return DropdownManager
