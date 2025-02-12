@@ -94,6 +94,19 @@ local function CreateExportDialog()
             UIDropDownMenu_Initialize(dialog.wowheadMiscDropdown, addon.DropdownManager.InitializeWowheadMiscDropdown)
         end
 
+        -- Update Icy Veins dropdowns
+        if #DataManager.GetAvailableEntries(addon.IcyVeinsMythicDB, classID, specID) > 0 then
+            UIDropDownMenu_Initialize(dialog.icyveinsMplusDropdown, addon.DropdownManager.InitializeIcyVeinsMythicDropdown)
+        end
+
+        if #DataManager.GetAvailableEntries(addon.IcyVeinsRaidDB, classID, specID) > 0 then
+            UIDropDownMenu_Initialize(dialog.icyveinsRaidDropdown, addon.DropdownManager.InitializeIcyVeinsRaidDropdown)
+        end
+
+        if #DataManager.GetAvailableEntries(addon.IcyVeinsMiscDB, classID, specID) > 0 then
+            UIDropDownMenu_Initialize(dialog.icyveinsMiscDropdown, addon.DropdownManager.InitializeIcyVeinsMiscDropdown)
+        end
+
         if not dialog.hideHooked and talentFrame then
             talentFrame:HookScript("OnHide", function()
                 dialog:Hide()
