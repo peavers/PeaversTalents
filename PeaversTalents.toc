@@ -1,19 +1,10 @@
 ## Interface: 110007
 ## Title: PeaversTalents
-## IconTexture: Interface\AddOns\PeaversTalents\src\Media\Icon.tga
+## Dependencies: PeaversTalentsData
 ## Notes: A simple addon to set talents to latest from Archon.
 ## Author: Peavers
 ## Version: 1.1.15
 ## X-Curse-Project-ID: 1184820
-
-src/Data/ArchonMythicDB.lua
-src/Data/ArchonRaidDB.lua
-src/Data/IcyVeinsMiscDB.lua
-src/Data/IcyVeinsMythicDB.lua
-src/Data/IcyVeinsRaidDB.lua
-src/Data/WowheadMiscDB.lua
-src/Data/WowheadMythicDB.lua
-src/Data/WowheadRaidDB.lua
 
 src/Core/Config.lua
 src/Core/DataManager.lua

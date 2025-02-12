@@ -6,44 +6,49 @@ local DataManager = addon.DataManager
 local DropdownManager = addon.DropdownManager or {}
 addon.DropdownManager = DropdownManager
 
-local function InitializeDropdown(self, level, database, editBox, talentsKey)
-	local info = UIDropDownMenu_CreateInfo()
-	local classID, specID = Utils.GetPlayerClassAndSpec()
-	local entries = DataManager.GetAvailableEntries(database, classID, specID)
+local function InitializeDropdown(self, level, source, category, editBox)
+    local info = UIDropDownMenu_CreateInfo()
+    local classID, specID = Utils.GetPlayerClassAndSpec()
+    local entries = DataManager.GetAvailableEntries(source, classID, specID, category)
 
-	-- Check if there's no data
-	if #entries == 0 then
-		info.text = "No data found"
-		info.disabled = true
-		info.notClickable = true
-		UIDropDownMenu_AddButton(info, level)
-		UIDropDownMenu_SetText(self, "No data found")
-		UIDropDownMenu_DisableDropDown(self)
-		return
-	end
+    -- Check if there's no data
+    if #entries == 0 then
+        info.text = "No data found"
+        info.disabled = true
+        info.notClickable = true
+        UIDropDownMenu_AddButton(info, level)
+        UIDropDownMenu_SetText(self, "No data found")
+        UIDropDownMenu_DisableDropDown(self)
+        return
+    end
 
     -- Set initial "Select" text if no selection has been made
     if UIDropDownMenu_GetText(self) == "" or UIDropDownMenu_GetText(self) == nil then
         UIDropDownMenu_SetText(self, "Select...")
     end
 
-	info.func = function(button)
-		local key = button.value
-		local classID, specID = Utils.GetPlayerClassAndSpec()
-
+    info.func = function(button)
+        local key = button.value
         Utils.Debug("Selected key:", key)
 
-        if database[classID] and
-            database[classID].specs and
-            database[classID].specs[specID] then
-            local data = database[classID].specs[specID][key]
-            if data then
-                editBox:SetText(data[talentsKey] or "")
+        -- Since we already have the entries, find the matching one
+        for _, entry in ipairs(entries) do
+            if entry.key == key then
+                editBox:SetText(entry.data.talentString or "")
                 editBox:SetCursorPosition(0)
-                UIDropDownMenu_SetText(self, data.label or key)
+                UIDropDownMenu_SetText(self, entry.data.label or tostring(key))
+                break
             end
         end
     end
+
+    -- Sort entries by name if label exists
+    table.sort(entries, function(a, b)
+        if a.data.label and b.data.label then
+            return a.data.label < b.data.label
+        end
+        return a.key < b.key
+    end)
 
     for _, entry in ipairs(entries) do
         info.text = entry.data.label or entry.key
@@ -57,36 +62,37 @@ local function InitializeDropdown(self, level, database, editBox, talentsKey)
     UIDropDownMenu_EnableDropDown(self)
 end
 
+-- Update dropdown initializers with categories
 function DropdownManager.InitializeArchonMythicDropdown(self, level)
-    InitializeDropdown(self, level, addon.ArchonMythicDB, addon.exportDialog.mplusEdit, "talentString")
+    InitializeDropdown(self, level, "archon", "mythic", addon.exportDialog.mplusEdit)
 end
 
 function DropdownManager.InitializeArchonRaidDropdown(self, level)
-    InitializeDropdown(self, level, addon.ArchonRaidDB, addon.exportDialog.raidEdit, "talentString")
+    InitializeDropdown(self, level, "archon", "raid", addon.exportDialog.raidEdit)
 end
 
 function DropdownManager.InitializeWowheadMythicDropdown(self, level)
-    InitializeDropdown(self, level, addon.WowheadMythicDB, addon.exportDialog.wowheadMplusEdit, "talentString")
+    InitializeDropdown(self, level, "wowhead", "mythic", addon.exportDialog.wowheadMplusEdit)
 end
 
 function DropdownManager.InitializeWowheadRaidDropdown(self, level)
-    InitializeDropdown(self, level, addon.WowheadRaidDB, addon.exportDialog.wowheadRaidEdit, "talentString")
+    InitializeDropdown(self, level, "wowhead", "raid", addon.exportDialog.wowheadRaidEdit)
 end
 
 function DropdownManager.InitializeWowheadMiscDropdown(self, level)
-    InitializeDropdown(self, level, addon.WowheadMiscDB, addon.exportDialog.wowheadMiscEdit, "talentString")
+    InitializeDropdown(self, level, "wowhead", "misc", addon.exportDialog.wowheadMiscEdit)
 end
 
 function DropdownManager.InitializeIcyVeinsMythicDropdown(self, level)
-    InitializeDropdown(self, level, addon.IcyVeinsMythicDB, addon.exportDialog.icyveinsMplusEdit, "talentString")
+    InitializeDropdown(self, level, "icy-veins", "mythic", addon.exportDialog.icyveinsMplusEdit)
 end
 
 function DropdownManager.InitializeIcyVeinsRaidDropdown(self, level)
-    InitializeDropdown(self, level, addon.IcyVeinsRaidDB, addon.exportDialog.icyveinsRaidEdit, "talentString")
+    InitializeDropdown(self, level, "icy-veins", "raid", addon.exportDialog.icyveinsRaidEdit)
 end
 
 function DropdownManager.InitializeIcyVeinsMiscDropdown(self, level)
-    InitializeDropdown(self, level, addon.IcyVeinsMiscDB, addon.exportDialog.icyveinsMiscEdit, "talentString")
+    InitializeDropdown(self, level, "icy-veins", "misc", addon.exportDialog.icyveinsMiscEdit)
 end
 
 return DropdownManager

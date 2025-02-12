@@ -18,6 +18,15 @@ addon.TabContent = TabContent
 local EventHandler = addon.EventHandler or {}
 addon.EventHandler = EventHandler
 
+-- Helper function to check if data addon is loaded and accessible
+local function CheckDataAddonLoaded()
+    if not PeaversTalentsData then
+        Utils.Debug("PeaversTalentsData addon not found!")
+        return false
+    end
+    return true
+end
+
 -- Create the export dialog
 local function CreateExportDialog()
     local dialog = CreateFrame("Frame", "TalentExportDialog", UIParent, "DefaultPanelTemplate")
@@ -72,41 +81,58 @@ local function CreateExportDialog()
     dialog:SetScript("OnShow", function()
         local classID, specID = Utils.GetPlayerClassAndSpec()
 
-        -- Update Archon dropdowns
-        if #DataManager.GetAvailableEntries(addon.ArchonMythicDB, classID, specID) > 0 then
-            UIDropDownMenu_Initialize(dialog.mplusDropdown, addon.DropdownManager.InitializeArchonMythicDropdown)
+        -- Check if data addon is loaded
+        if not CheckDataAddonLoaded() then
+            return
         end
 
-        if #DataManager.GetAvailableEntries(addon.ArchonRaidDB, classID, specID) > 0 then
-            UIDropDownMenu_Initialize(dialog.raidDropdown, addon.DropdownManager.InitializeArchonRaidDropdown)
+        -- Get all available sources
+        local sources = PeaversTalentsData.API.GetSources()
+
+        -- Initialize Archon dropdowns
+        if Utils.TableContains(sources, "archon") then
+            local builds = PeaversTalentsData.API.GetBuilds(classID, specID, "archon")
+            if builds and #builds > 0 then
+                UIDropDownMenu_Initialize(dialog.mplusDropdown, addon.DropdownManager.InitializeArchonMythicDropdown)
+                UIDropDownMenu_Initialize(dialog.raidDropdown, addon.DropdownManager.InitializeArchonRaidDropdown)
+            end
         end
 
-        -- Update Wowhead dropdowns
-        if #DataManager.GetAvailableEntries(addon.WowheadMythicDB, classID, specID) > 0 then
-            UIDropDownMenu_Initialize(dialog.wowheadMplusDropdown, addon.DropdownManager.InitializeWowheadMythicDropdown)
+        -- Initialize Wowhead dropdowns
+        if Utils.TableContains(sources, "wowhead") then
+            local builds = PeaversTalentsData.API.GetBuilds(classID, specID, "wowhead")
+            if builds and #builds > 0 then
+                UIDropDownMenu_Initialize(dialog.wowheadMplusDropdown, addon.DropdownManager.InitializeWowheadMythicDropdown)
+                UIDropDownMenu_Initialize(dialog.wowheadRaidDropdown, addon.DropdownManager.InitializeWowheadRaidDropdown)
+                UIDropDownMenu_Initialize(dialog.wowheadMiscDropdown, addon.DropdownManager.InitializeWowheadMiscDropdown)
+            end
         end
 
-        if #DataManager.GetAvailableEntries(addon.WowheadRaidDB, classID, specID) > 0 then
-            UIDropDownMenu_Initialize(dialog.wowheadRaidDropdown, addon.DropdownManager.InitializeWowheadRaidDropdown)
+        -- Initialize Icy Veins dropdowns
+        if Utils.TableContains(sources, "icy-veins") then
+            local builds = PeaversTalentsData.API.GetBuilds(classID, specID, "icy-veins")
+            if builds and #builds > 0 then
+                UIDropDownMenu_Initialize(dialog.icyveinsMplusDropdown, addon.DropdownManager.InitializeIcyVeinsMythicDropdown)
+                UIDropDownMenu_Initialize(dialog.icyveinsRaidDropdown, addon.DropdownManager.InitializeIcyVeinsRaidDropdown)
+                UIDropDownMenu_Initialize(dialog.icyveinsMiscDropdown, addon.DropdownManager.InitializeIcyVeinsMiscDropdown)
+            end
         end
 
-        if #DataManager.GetAvailableEntries(addon.WowheadMiscDB, classID, specID) > 0 then
-            UIDropDownMenu_Initialize(dialog.wowheadMiscDropdown, addon.DropdownManager.InitializeWowheadMiscDropdown)
+        -- Handle tab visibility based on available data
+        for i, tab in ipairs(dialog.Tabs) do
+            local source = i == 1 and "archon" or i == 2 and "wowhead" or "icy-veins"
+            local hasData = Utils.TableContains(sources, source) and
+                           PeaversTalentsData.API.GetBuilds(classID, specID, source) and
+                           #PeaversTalentsData.API.GetBuilds(classID, specID, source) > 0
+
+            if hasData then
+                tab:Show()
+            else
+                tab:Hide()
+            end
         end
 
-        -- Update Icy Veins dropdowns
-        if #DataManager.GetAvailableEntries(addon.IcyVeinsMythicDB, classID, specID) > 0 then
-            UIDropDownMenu_Initialize(dialog.icyveinsMplusDropdown, addon.DropdownManager.InitializeIcyVeinsMythicDropdown)
-        end
-
-        if #DataManager.GetAvailableEntries(addon.IcyVeinsRaidDB, classID, specID) > 0 then
-            UIDropDownMenu_Initialize(dialog.icyveinsRaidDropdown, addon.DropdownManager.InitializeIcyVeinsRaidDropdown)
-        end
-
-        if #DataManager.GetAvailableEntries(addon.IcyVeinsMiscDB, classID, specID) > 0 then
-            UIDropDownMenu_Initialize(dialog.icyveinsMiscDropdown, addon.DropdownManager.InitializeIcyVeinsMiscDropdown)
-        end
-
+        -- Hook the hide script if not already done
         if not dialog.hideHooked and talentFrame then
             talentFrame:HookScript("OnHide", function()
                 dialog:Hide()
@@ -128,6 +154,16 @@ function addon.ShowExportDialog()
     Utils.Debug("Showing export dialog")
     local dialog = addon.exportDialog or CreateExportDialog()
     dialog:Show()
+end
+
+-- Helper function for source checking
+function Utils.TableContains(tbl, value)
+    for _, v in pairs(tbl) do
+        if v == value then
+            return true
+        end
+    end
+    return false
 end
 
 -- Initialize events

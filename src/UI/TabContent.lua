@@ -3,6 +3,7 @@ local Utils = addon.Utils
 local TabContent = addon.TabContent or {}
 addon.TabContent = TabContent
 
+
 function TabContent.CreateEditBox(parent, name)
 	local editBox = CreateFrame("EditBox", name, parent, "InputBoxTemplate")
 	editBox:SetSize(380, 32)
@@ -47,7 +48,7 @@ function TabContent.CreateArchonTab(dialog, tab)
 
 	local instructionsText = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 	instructionsText:SetPoint("BOTTOM", tab, "BOTTOM", 0, 55)
-	instructionsText:SetText("Select a build to copy the latest talent string | Builds as of " .. Utils.GetFormattedLocalTime(addon.ArchonMythicDB.updated))
+	instructionsText:SetText("Select a build to copy the latest talent string | Builds as of " .. Utils.GetFormattedUpdate("archon"))
 	instructionsText:SetJustifyH("CENTER")
 end
 
@@ -102,7 +103,7 @@ function TabContent.CreateWowheadTab(dialog, tab)
 
 	local instructionsText = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 	instructionsText:SetPoint("BOTTOM", tab, "BOTTOM", 0, 55)
-	instructionsText:SetText("Select a build to copy the latest talent string | Builds as of " .. Utils.GetFormattedLocalTime(addon.WowheadMythicDB.updated))
+	instructionsText:SetText("Select a build to copy the latest talent string | Builds as of " .. Utils.GetFormattedUpdate("wowhead"))
 	instructionsText:SetJustifyH("CENTER")
 end
 
@@ -157,7 +158,7 @@ function TabContent.CreateIceyVeinsTab(dialog, tab)
 
 	local instructionsText = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 	instructionsText:SetPoint("BOTTOM", tab, "BOTTOM", 0, 55)
-	instructionsText:SetText("Select a build to copy the latest talent string | Builds as of " .. Utils.GetFormattedLocalTime(addon.IcyVeinsMythicDB.updated))
+	instructionsText:SetText("Select a build to copy the latest talent string | Builds as of " .. Utils.GetFormattedUpdate("icy-veins"))
 	instructionsText:SetJustifyH("CENTER")
 end
 
