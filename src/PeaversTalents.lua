@@ -84,62 +84,77 @@ local function CreateExportDialog()
     -- OnShow handler
     dialog:SetScript("OnShow", function()
         local classID, specID = Utils.GetPlayerClassAndSpec()
+        Utils.Debug("Dialog shown - Loading saved selections")
 
         -- Check if data addon is loaded
         if not CheckDataAddonLoaded() then
             return
         end
 
+        -- Load any saved selection first
+        local savedSource, savedCategory, savedBuildKey = addon.LocalStorage.LoadSelection()
+        Utils.Debug("Loaded saved selection:", savedSource, savedCategory, savedBuildKey)
+
         -- Get all available sources
         local sources = PeaversTalentsData.API.GetSources()
 
-        -- Initialize Archon dropdowns
-        if Utils.TableContains(sources, "archon") then
-            local builds = PeaversTalentsData.API.GetBuilds(classID, specID, "archon")
-            if builds and #builds > 0 then
-                UIDropDownMenu_Initialize(dialog.archonMythicDropdown, addon.DropdownManager.InitializeArchonMythicDropdown)
-                UIDropDownMenu_Initialize(dialog.archonRaidDropdown, addon.DropdownManager.InitializeArchonRaidDropdown)
+        -- Initialize dropdowns based on available data
+        for source, tabs in pairs({
+            archon = {mythic = "Mythic", raid = "Raid"},
+            wowhead = {mythic = "Mythic", raid = "Raid", misc = "Misc"},
+            ["icy-veins"] = {mythic = "Mythic", raid = "Raid", misc = "Misc"},
+            ugg = {mythic = "Mythic", raid = "Raid"}
+        }) do
+            if Utils.TableContains(sources, source) then
+                local builds = PeaversTalentsData.API.GetBuilds(classID, specID, source)
+                if builds and #builds > 0 then
+                    for category, _ in pairs(tabs) do
+                        local dropdownName = source .. category:gsub("^%l", string.upper) .. "Dropdown"
+                        local dropdown = dialog[dropdownName]
+                        if dropdown then
+                            UIDropDownMenu_Initialize(dropdown, addon.DropdownManager["Initialize" .. source:gsub("^%l", string.upper) .. category:gsub("^%l", string.upper) .. "Dropdown"])
+
+                            -- If this is our saved selection, set it
+                            if savedSource == source and savedCategory == category then
+                                Utils.Debug("Found matching dropdown for saved selection:", dropdownName)
+                                for _, build in ipairs(builds) do
+                                    if build.dungeonID == savedBuildKey then
+                                        local editBox = dialog[source .. category:gsub("^%l", string.upper) .. "Edit"]
+                                        if editBox then
+                                            editBox:SetText(build.talentString or "")
+                                            editBox:SetCursorPosition(0)
+                                            UIDropDownMenu_SetText(dropdown, build.label or tostring(savedBuildKey))
+                                        end
+                                        break
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
             end
         end
-
-        -- Initialize Wowhead dropdowns
-        if Utils.TableContains(sources, "wowhead") then
-            local builds = PeaversTalentsData.API.GetBuilds(classID, specID, "wowhead")
-            if builds and #builds > 0 then
-                UIDropDownMenu_Initialize(dialog.wowheadMythicDropdown, addon.DropdownManager.InitializeWowheadMythicDropdown)
-                UIDropDownMenu_Initialize(dialog.wowheadRaidDropdown, addon.DropdownManager.InitializeWowheadRaidDropdown)
-                UIDropDownMenu_Initialize(dialog.wowheadMiscDropdown, addon.DropdownManager.InitializeWowheadMiscDropdown)
-            end
-        end
-
-        -- Initialize Icy Veins dropdowns
-        if Utils.TableContains(sources, "icy-veins") then
-            local builds = PeaversTalentsData.API.GetBuilds(classID, specID, "icy-veins")
-            if builds and #builds > 0 then
-                UIDropDownMenu_Initialize(dialog.icyveinsMythicDropdown, addon.DropdownManager.InitializeIcyVeinsMythicDropdown)
-                UIDropDownMenu_Initialize(dialog.icyveinsRaidDropdown, addon.DropdownManager.InitializeIcyVeinsRaidDropdown)
-                UIDropDownMenu_Initialize(dialog.icyveinsMiscDropdown, addon.DropdownManager.InitializeIcyVeinsMiscDropdown)
-            end
-        end
-
-		-- Initialize U.GG dropdowns
-		if Utils.TableContains(sources, "ugg") then
-			local builds = PeaversTalentsData.API.GetBuilds(classID, specID, "ugg")
-			if builds and #builds > 0 then
-				UIDropDownMenu_Initialize(dialog.uggMythicDropdown, addon.DropdownManager.InitializeUggMythicDropdown)
-				UIDropDownMenu_Initialize(dialog.uggRaidDropdown, addon.DropdownManager.InitializeUggRaidDropdown)
-			end
-		end
 
         -- Handle tab visibility based on available data
         for i, tab in ipairs(dialog.Tabs) do
             local source = i == 1 and "archon" or i == 2 and "wowhead" or i == 3 and "icy-veins" or i == 4 and "ugg"
             local hasData = Utils.TableContains(sources, source) and
-                           PeaversTalentsData.API.GetBuilds(classID, specID, source) and
-                           #PeaversTalentsData.API.GetBuilds(classID, specID, source) > 0
+                    PeaversTalentsData.API.GetBuilds(classID, specID, source) and
+                    #PeaversTalentsData.API.GetBuilds(classID, specID, source) > 0
 
             if hasData then
                 tab:Show()
+                -- If this was our saved source, show its tab
+                if source == savedSource then
+                    PanelTemplates_SetTab(dialog, i)
+                    for j, content in pairs(dialog.TabContents) do
+                        if j == i then
+                            content:Show()
+                        else
+                            content:Hide()
+                        end
+                    end
+                end
             else
                 tab:Hide()
             end
