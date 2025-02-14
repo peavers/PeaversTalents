@@ -49,12 +49,13 @@ local function CreateExportDialog()
     dialog.Tabs[1] = UIComponents.CreateTab(dialog, 1, "Archon")
     dialog.Tabs[2] = UIComponents.CreateTab(dialog, 2, "Wowhead")
     dialog.Tabs[3] = UIComponents.CreateTab(dialog, 3, "Icy Veins")
+    dialog.Tabs[4] = UIComponents.CreateTab(dialog, 4, "U.GG")
 
-    PanelTemplates_SetNumTabs(dialog, 3)
+    PanelTemplates_SetNumTabs(dialog, 4)
     PanelTemplates_SetTab(dialog, 1)
 
     -- Create tab contents
-    for i = 1, 3 do
+    for i = 1, 4 do
         dialog.TabContents[i] = UIComponents.CreateTabContent(dialog)
     end
 
@@ -68,6 +69,9 @@ local function CreateExportDialog()
 
     local tab3 = dialog.TabContents[3]
     TabContent.CreateIceyVeinsTab(dialog, tab3)
+
+    local tab4 = dialog.TabContents[4]
+    TabContent.CreateUggTab(dialog, tab4)
 
     -- Frame behavior
     dialog:SetMovable(true)
@@ -93,8 +97,8 @@ local function CreateExportDialog()
         if Utils.TableContains(sources, "archon") then
             local builds = PeaversTalentsData.API.GetBuilds(classID, specID, "archon")
             if builds and #builds > 0 then
-                UIDropDownMenu_Initialize(dialog.mplusDropdown, addon.DropdownManager.InitializeArchonMythicDropdown)
-                UIDropDownMenu_Initialize(dialog.raidDropdown, addon.DropdownManager.InitializeArchonRaidDropdown)
+                UIDropDownMenu_Initialize(dialog.archonMythicDropdown, addon.DropdownManager.InitializeArchonMythicDropdown)
+                UIDropDownMenu_Initialize(dialog.archonRaidDropdown, addon.DropdownManager.InitializeArchonRaidDropdown)
             end
         end
 
@@ -102,7 +106,7 @@ local function CreateExportDialog()
         if Utils.TableContains(sources, "wowhead") then
             local builds = PeaversTalentsData.API.GetBuilds(classID, specID, "wowhead")
             if builds and #builds > 0 then
-                UIDropDownMenu_Initialize(dialog.wowheadMplusDropdown, addon.DropdownManager.InitializeWowheadMythicDropdown)
+                UIDropDownMenu_Initialize(dialog.wowheadMythicDropdown, addon.DropdownManager.InitializeWowheadMythicDropdown)
                 UIDropDownMenu_Initialize(dialog.wowheadRaidDropdown, addon.DropdownManager.InitializeWowheadRaidDropdown)
                 UIDropDownMenu_Initialize(dialog.wowheadMiscDropdown, addon.DropdownManager.InitializeWowheadMiscDropdown)
             end
@@ -112,15 +116,24 @@ local function CreateExportDialog()
         if Utils.TableContains(sources, "icy-veins") then
             local builds = PeaversTalentsData.API.GetBuilds(classID, specID, "icy-veins")
             if builds and #builds > 0 then
-                UIDropDownMenu_Initialize(dialog.icyveinsMplusDropdown, addon.DropdownManager.InitializeIcyVeinsMythicDropdown)
+                UIDropDownMenu_Initialize(dialog.icyveinsMythicDropdown, addon.DropdownManager.InitializeIcyVeinsMythicDropdown)
                 UIDropDownMenu_Initialize(dialog.icyveinsRaidDropdown, addon.DropdownManager.InitializeIcyVeinsRaidDropdown)
                 UIDropDownMenu_Initialize(dialog.icyveinsMiscDropdown, addon.DropdownManager.InitializeIcyVeinsMiscDropdown)
             end
         end
 
+		-- Initialize U.GG dropdowns
+		if Utils.TableContains(sources, "ugg") then
+			local builds = PeaversTalentsData.API.GetBuilds(classID, specID, "ugg")
+			if builds and #builds > 0 then
+				UIDropDownMenu_Initialize(dialog.uggMythicDropdown, addon.DropdownManager.InitializeUggMythicDropdown)
+				UIDropDownMenu_Initialize(dialog.uggRaidDropdown, addon.DropdownManager.InitializeUggRaidDropdown)
+			end
+		end
+
         -- Handle tab visibility based on available data
         for i, tab in ipairs(dialog.Tabs) do
-            local source = i == 1 and "archon" or i == 2 and "wowhead" or "icy-veins"
+            local source = i == 1 and "archon" or i == 2 and "wowhead" or i == 3 and "icy-veins" or i == 4 and "ugg"
             local hasData = Utils.TableContains(sources, source) and
                            PeaversTalentsData.API.GetBuilds(classID, specID, source) and
                            #PeaversTalentsData.API.GetBuilds(classID, specID, source) > 0

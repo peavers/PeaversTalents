@@ -3,163 +3,151 @@ local Utils = addon.Utils
 local TabContent = addon.TabContent or {}
 addon.TabContent = TabContent
 
-
 function TabContent.CreateEditBox(parent, name)
-	local editBox = CreateFrame("EditBox", name, parent, "InputBoxTemplate")
-	editBox:SetSize(380, 32)
-	editBox:SetAutoFocus(false)
-	editBox:SetFontObject(ChatFontNormal)
-	editBox:EnableMouse(true)
-	return editBox
+    local editBox = CreateFrame("EditBox", name, parent, "InputBoxTemplate")
+    editBox:SetSize(380, 32)
+    editBox:SetAutoFocus(false)
+    editBox:SetFontObject(ChatFontNormal)
+    editBox:EnableMouse(true)
+    return editBox
 end
 
+-- Configuration for different tab types
+local TAB_CONFIGS = {
+    archon = {
+        sections = {
+            {
+                name = "Mythic+",
+                dropdownInitializer = "InitializeArchonMythicDropdown",
+                editBoxPrefix = "archonMythic"
+            },
+            {
+                name = "Raid",
+                dropdownInitializer = "InitializeArchonRaidDropdown",
+                editBoxPrefix = "archonRaid"
+            }
+        },
+        updateKey = "archon"
+    },
+    wowhead = {
+        sections = {
+            {
+                name = "Mythic+",
+                dropdownInitializer = "InitializeWowheadMythicDropdown",
+                editBoxPrefix = "wowheadMythic"
+            },
+            {
+                name = "Raid",
+                dropdownInitializer = "InitializeWowheadRaidDropdown",
+                editBoxPrefix = "wowheadRaid"
+            },
+            {
+                name = "Misc",
+                dropdownInitializer = "InitializeWowheadMiscDropdown",
+                editBoxPrefix = "wowheadMisc"
+            }
+        },
+        updateKey = "wowhead"
+    },
+    icyveins = {
+        sections = {
+            {
+                name = "Mythic+",
+                dropdownInitializer = "InitializeIcyVeinsMythicDropdown",
+                editBoxPrefix = "icyveinsMythic"
+            },
+            {
+                name = "Raid",
+                dropdownInitializer = "InitializeIcyVeinsRaidDropdown",
+                editBoxPrefix = "icyveinsRaid"
+            },
+            {
+                name = "Misc",
+                dropdownInitializer = "InitializeIcyVeinsMiscDropdown",
+                editBoxPrefix = "icyveinsMisc"
+            }
+        },
+        updateKey = "icy-veins"
+    },
+    ugg = {
+        sections = {
+            {
+                name = "Mythic+",
+                dropdownInitializer = "InitializeUggMythicDropdown",
+                editBoxPrefix = "uggMythic"
+            },
+            {
+                name = "Raid",
+                dropdownInitializer = "InitializeUggRaidDropdown",
+                editBoxPrefix = "uggRaid"
+            }
+        },
+        updateKey = "ugg"
+    }
+}
+
+-- Generic function to create a section (Mythic+, Raid, or Misc)
+local function CreateSection(dialog, tab, section, prevElement, isFirst)
+    local label = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalMed2")
+    if isFirst then
+        label:SetPoint("TOPLEFT", addon.Config.DIALOG.PADDING.SIDE, -10)
+    else
+        label:SetPoint("TOPLEFT", prevElement, "BOTTOMLEFT", -195, -addon.Config.DIALOG.SECTION_SPACING)
+    end
+    label:SetText(section.name)
+
+    local descKey = section.name:lower():gsub("%+", "plus") .. "Desc"
+    dialog[descKey] = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    dialog[descKey]:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -addon.Config.DIALOG.PADDING.LABEL)
+
+    local dropdownName = "TalentExportDialog_" .. section.name:gsub("%+", "") .. "Dropdown"
+    local dropdown = CreateFrame("Frame", dropdownName, tab, "UIDropDownMenuTemplate")
+    dropdown:SetPoint("TOPLEFT", dialog[descKey], "BOTTOMLEFT", -15, -5)
+    UIDropDownMenu_SetWidth(dropdown, 150)
+    UIDropDownMenu_Initialize(dropdown, addon.DropdownManager[section.dropdownInitializer])
+    dialog[section.editBoxPrefix .. "Dropdown"] = dropdown
+
+    local editBox = TabContent.CreateEditBox(tab, dropdownName:gsub("Dropdown", "Edit"))
+    editBox:SetPoint("LEFT", dropdown, "RIGHT", 10, 2)
+    dialog[section.editBoxPrefix .. "Edit"] = editBox
+
+    return editBox
+end
+
+-- Generic function to create any type of tab
+local function CreateTab(dialog, tab, tabType)
+    local config = TAB_CONFIGS[tabType]
+    if not config then
+        error("Unknown tab type: " .. tostring(tabType))
+        return
+    end
+
+    local prevElement = nil
+    for i, section in ipairs(config.sections) do
+        prevElement = CreateSection(dialog, tab, section, prevElement, i == 1)
+    end
+
+    local instructionsText = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    instructionsText:SetPoint("BOTTOM", tab, "BOTTOM", 0, 55)
+    instructionsText:SetText("Updated " .. Utils.GetFormattedUpdate(config.updateKey))
+    instructionsText:SetJustifyH("CENTER")
+end
+
+-- Create specific tab functions using the generic CreateTab function
 function TabContent.CreateArchonTab(dialog, tab)
-	-- Mythic+ Section
-	local mplusLabel = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalMed2")
-	mplusLabel:SetPoint("TOPLEFT", addon.Config.DIALOG.PADDING.SIDE, -10)
-	mplusLabel:SetText("Mythic+")
-
-	dialog.mplusDesc = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-	dialog.mplusDesc:SetPoint("TOPLEFT", mplusLabel, "BOTTOMLEFT", 0, -addon.Config.DIALOG.PADDING.LABEL)
-
-	dialog.mplusDropdown = CreateFrame("Frame", "TalentExportDialog_MplusDropdown", tab, "UIDropDownMenuTemplate")
-	dialog.mplusDropdown:SetPoint("TOPLEFT", dialog.mplusDesc, "BOTTOMLEFT", -15, -5)
-	UIDropDownMenu_SetWidth(dialog.mplusDropdown, 150)
-	UIDropDownMenu_Initialize(dialog.mplusDropdown, addon.DropdownManager.InitializeArchonMythicDropdown)
-
-	dialog.mplusEdit = TabContent.CreateEditBox(tab, "TalentExportDialog_MplusEdit")
-	dialog.mplusEdit:SetPoint("LEFT", dialog.mplusDropdown, "RIGHT", 10, 2)
-
-	-- Raid Section
-	local raidLabel = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalMed2")
-	raidLabel:SetPoint("TOPLEFT", dialog.mplusEdit, "BOTTOMLEFT", -195, -addon.Config.DIALOG.SECTION_SPACING)
-	raidLabel:SetText("Raid")
-
-	dialog.raidDesc = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-	dialog.raidDesc:SetPoint("TOPLEFT", raidLabel, "BOTTOMLEFT", 0, -addon.Config.DIALOG.PADDING.LABEL)
-
-	dialog.raidDropdown = CreateFrame("Frame", "TalentExportDialog_RaidDropdown", tab, "UIDropDownMenuTemplate")
-	dialog.raidDropdown:SetPoint("TOPLEFT", dialog.raidDesc, "BOTTOMLEFT", -15, -5)
-	UIDropDownMenu_SetWidth(dialog.raidDropdown, 150)
-	UIDropDownMenu_Initialize(dialog.raidDropdown, addon.DropdownManager.InitializeArchonRaidDropdown)
-
-	dialog.raidEdit = TabContent.CreateEditBox(tab, "TalentExportDialog_RaidEdit")
-	dialog.raidEdit:SetPoint("LEFT", dialog.raidDropdown, "RIGHT", 10, 2)
-
-	local instructionsText = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-	instructionsText:SetPoint("BOTTOM", tab, "BOTTOM", 0, 55)
-	instructionsText:SetText("Select a build to copy the latest talent string | Builds as of " .. Utils.GetFormattedUpdate("archon"))
-	instructionsText:SetJustifyH("CENTER")
+    CreateTab(dialog, tab, "archon")
 end
 
 function TabContent.CreateWowheadTab(dialog, tab)
-	-- Mythic+ Section
-	local mplusLabel = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalMed2")
-	mplusLabel:SetPoint("TOPLEFT", addon.Config.DIALOG.PADDING.SIDE, -10)
-	mplusLabel:SetText("Mythic+")
-
-	dialog.wowheadMplusDesc = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-	dialog.wowheadMplusDesc:SetPoint("TOPLEFT", mplusLabel, "BOTTOMLEFT", 0, -addon.Config.DIALOG.PADDING.LABEL)
-
-	dialog.wowheadMplusDropdown = CreateFrame("Frame", "TalentExportDialog_WowheadMplusDropdown", tab, "UIDropDownMenuTemplate")
-	dialog.wowheadMplusDropdown:SetPoint("TOPLEFT", dialog.wowheadMplusDesc, "BOTTOMLEFT", -15, -5)
-	UIDropDownMenu_SetWidth(dialog.wowheadMplusDropdown, 150)
-	UIDropDownMenu_Initialize(dialog.wowheadMplusDropdown, addon.DropdownManager.InitializeWowheadMythicDropdown)
-
-	dialog.wowheadMplusEdit = TabContent.CreateEditBox(tab, "TalentExportDialog_WowheadMplusEdit")
-	dialog.wowheadMplusEdit:SetPoint("LEFT", dialog.wowheadMplusDropdown, "RIGHT", 10, 2)
-
-	-- Raid Section
-	local raidLabel = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalMed2")
-	raidLabel:SetPoint("TOPLEFT", dialog.wowheadMplusEdit, "BOTTOMLEFT", -195, -addon.Config.DIALOG.SECTION_SPACING)
-	raidLabel:SetText("Raid")
-
-	dialog.wowheadRaidDesc = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-	dialog.wowheadRaidDesc:SetPoint("TOPLEFT", raidLabel, "BOTTOMLEFT", 0, -addon.Config.DIALOG.PADDING.LABEL)
-
-	dialog.wowheadRaidDropdown = CreateFrame("Frame", "TalentExportDialog_WowheadRaidDropdown", tab, "UIDropDownMenuTemplate")
-	dialog.wowheadRaidDropdown:SetPoint("TOPLEFT", dialog.wowheadRaidDesc, "BOTTOMLEFT", -15, -5)
-	UIDropDownMenu_SetWidth(dialog.wowheadRaidDropdown, 150)
-	UIDropDownMenu_Initialize(dialog.wowheadRaidDropdown, addon.DropdownManager.InitializeWowheadRaidDropdown)
-
-	dialog.wowheadRaidEdit = TabContent.CreateEditBox(tab, "TalentExportDialog_WowheadRaidEdit")
-	dialog.wowheadRaidEdit:SetPoint("LEFT", dialog.wowheadRaidDropdown, "RIGHT", 10, 2)
-
-	-- Misc Section
-	local miscLabel = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalMed2")
-	miscLabel:SetPoint("TOPLEFT", dialog.wowheadRaidEdit, "BOTTOMLEFT", -195, -addon.Config.DIALOG.SECTION_SPACING)
-	miscLabel:SetText("Misc")
-
-	dialog.wowheadMiscDesc = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-	dialog.wowheadMiscDesc:SetPoint("TOPLEFT", miscLabel, "BOTTOMLEFT", 0, -addon.Config.DIALOG.PADDING.LABEL)
-
-	dialog.wowheadMiscDropdown = CreateFrame("Frame", "TalentExportDialog_WowheadMiscDropdown", tab, "UIDropDownMenuTemplate")
-	dialog.wowheadMiscDropdown:SetPoint("TOPLEFT", dialog.wowheadMiscDesc, "BOTTOMLEFT", -15, -5)
-	UIDropDownMenu_SetWidth(dialog.wowheadMiscDropdown, 150)
-	UIDropDownMenu_Initialize(dialog.wowheadMiscDropdown, addon.DropdownManager.InitializeWowheadMiscDropdown)
-
-	dialog.wowheadMiscEdit = TabContent.CreateEditBox(tab, "TalentExportDialog_WowheadMiscEdit")
-	dialog.wowheadMiscEdit:SetPoint("LEFT", dialog.wowheadMiscDropdown, "RIGHT", 10, 2)
-
-	local instructionsText = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-	instructionsText:SetPoint("BOTTOM", tab, "BOTTOM", 0, 55)
-	instructionsText:SetText("Select a build to copy the latest talent string | Builds as of " .. Utils.GetFormattedUpdate("wowhead"))
-	instructionsText:SetJustifyH("CENTER")
+    CreateTab(dialog, tab, "wowhead")
 end
 
 function TabContent.CreateIceyVeinsTab(dialog, tab)
-	-- Mythic+ Section
-	local mplusLabel = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalMed2")
-	mplusLabel:SetPoint("TOPLEFT", addon.Config.DIALOG.PADDING.SIDE, -10)
-	mplusLabel:SetText("Mythic+")
+    CreateTab(dialog, tab, "icyveins")
+end
 
-	dialog.icyveinsMplusDesc = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-	dialog.icyveinsMplusDesc:SetPoint("TOPLEFT", mplusLabel, "BOTTOMLEFT", 0, -addon.Config.DIALOG.PADDING.LABEL)
-
-	dialog.icyveinsMplusDropdown = CreateFrame("Frame", "TalentExportDialog_IceveinsMplusDropdown", tab, "UIDropDownMenuTemplate")
-	dialog.icyveinsMplusDropdown:SetPoint("TOPLEFT", dialog.icyveinsMplusDesc, "BOTTOMLEFT", -15, -5)
-	UIDropDownMenu_SetWidth(dialog.icyveinsMplusDropdown, 150)
-	UIDropDownMenu_Initialize(dialog.icyveinsMplusDropdown, addon.DropdownManager.InitializeIcyVeinsMythicDropdown)
-
-	dialog.icyveinsMplusEdit = TabContent.CreateEditBox(tab, "TalentExportDialog_IcyVeinsMplusEdit")
-	dialog.icyveinsMplusEdit:SetPoint("LEFT", dialog.icyveinsMplusDropdown, "RIGHT", 10, 2)
-
-	-- Raid Section
-	local raidLabel = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalMed2")
-	raidLabel:SetPoint("TOPLEFT", dialog.icyveinsMplusEdit, "BOTTOMLEFT", -195, -addon.Config.DIALOG.SECTION_SPACING)
-	raidLabel:SetText("Raid")
-
-	dialog.icyveinsRaidDesc = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-	dialog.icyveinsRaidDesc:SetPoint("TOPLEFT", raidLabel, "BOTTOMLEFT", 0, -addon.Config.DIALOG.PADDING.LABEL)
-
-	dialog.icyveinsRaidDropdown = CreateFrame("Frame", "TalentExportDialog_IcyVeinsRaidDropdown", tab, "UIDropDownMenuTemplate")
-	dialog.icyveinsRaidDropdown:SetPoint("TOPLEFT", dialog.icyveinsRaidDesc, "BOTTOMLEFT", -15, -5)
-	UIDropDownMenu_SetWidth(dialog.icyveinsRaidDropdown, 150)
-	UIDropDownMenu_Initialize(dialog.icyveinsRaidDropdown, addon.DropdownManager.InitializeIcyVeinsRaidDropdown)
-
-	dialog.icyveinsRaidEdit = TabContent.CreateEditBox(tab, "TalentExportDialog_IcyVeinsRaidEdit")
-	dialog.icyveinsRaidEdit:SetPoint("LEFT", dialog.icyveinsRaidDropdown, "RIGHT", 10, 2)
-
-	-- Misc Section
-	local miscLabel = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalMed2")
-	miscLabel:SetPoint("TOPLEFT", dialog.icyveinsRaidEdit, "BOTTOMLEFT", -195, -addon.Config.DIALOG.SECTION_SPACING)
-	miscLabel:SetText("Misc")
-
-	dialog.icyveinsMiscDesc = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-	dialog.icyveinsMiscDesc:SetPoint("TOPLEFT", miscLabel, "BOTTOMLEFT", 0, -addon.Config.DIALOG.PADDING.LABEL)
-
-	dialog.icyveinsMiscDropdown = CreateFrame("Frame", "TalentExportDialog_IcyVeinsMiscDropdown", tab, "UIDropDownMenuTemplate")
-	dialog.icyveinsMiscDropdown:SetPoint("TOPLEFT", dialog.icyveinsMiscDesc, "BOTTOMLEFT", -15, -5)
-	UIDropDownMenu_SetWidth(dialog.icyveinsMiscDropdown, 150)
-	UIDropDownMenu_Initialize(dialog.icyveinsMiscDropdown, addon.DropdownManager.InitializeIcyVeinsMiscDropdown)
-
-	dialog.icyveinsMiscEdit = TabContent.CreateEditBox(tab, "TalentExportDialog_IcyVeinsMiscEdit")
-	dialog.icyveinsMiscEdit:SetPoint("LEFT", dialog.icyveinsMiscDropdown, "RIGHT", 10, 2)
-
-	local instructionsText = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-	instructionsText:SetPoint("BOTTOM", tab, "BOTTOM", 0, 55)
-	instructionsText:SetText("Select a build to copy the latest talent string | Builds as of " .. Utils.GetFormattedUpdate("icy-veins"))
-	instructionsText:SetJustifyH("CENTER")
+function TabContent.CreateUggTab(dialog, tab)
+    CreateTab(dialog, tab, "ugg")
 end
 
 return TabContent

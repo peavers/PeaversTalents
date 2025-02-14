@@ -64,15 +64,15 @@ end
 
 -- Update dropdown initializers with categories
 function DropdownManager.InitializeArchonMythicDropdown(self, level)
-    InitializeDropdown(self, level, "archon", "mythic", addon.exportDialog.mplusEdit)
+    InitializeDropdown(self, level, "archon", "mythic", addon.exportDialog.archonMythicEdit)
 end
 
 function DropdownManager.InitializeArchonRaidDropdown(self, level)
-    InitializeDropdown(self, level, "archon", "raid", addon.exportDialog.raidEdit)
+    InitializeDropdown(self, level, "archon", "raid", addon.exportDialog.archonRaidEdit)
 end
 
 function DropdownManager.InitializeWowheadMythicDropdown(self, level)
-    InitializeDropdown(self, level, "wowhead", "mythic", addon.exportDialog.wowheadMplusEdit)
+    InitializeDropdown(self, level, "wowhead", "mythic", addon.exportDialog.wowheadMythicEdit)
 end
 
 function DropdownManager.InitializeWowheadRaidDropdown(self, level)
@@ -84,7 +84,7 @@ function DropdownManager.InitializeWowheadMiscDropdown(self, level)
 end
 
 function DropdownManager.InitializeIcyVeinsMythicDropdown(self, level)
-    InitializeDropdown(self, level, "icy-veins", "mythic", addon.exportDialog.icyveinsMplusEdit)
+    InitializeDropdown(self, level, "icy-veins", "mythic", addon.exportDialog.icyveinsMythicEdit)
 end
 
 function DropdownManager.InitializeIcyVeinsRaidDropdown(self, level)
@@ -93,6 +93,14 @@ end
 
 function DropdownManager.InitializeIcyVeinsMiscDropdown(self, level)
     InitializeDropdown(self, level, "icy-veins", "misc", addon.exportDialog.icyveinsMiscEdit)
+end
+
+function DropdownManager.InitializeUggMythicDropdown(self, level)
+    InitializeDropdown(self, level, "ugg", "mythic", addon.exportDialog.uggMythicEdit)
+end
+
+function DropdownManager.InitializeUggRaidDropdown(self, level)
+    InitializeDropdown(self, level, "ugg", "raid", addon.exportDialog.uggRaidEdit)
 end
 
 return DropdownManager
