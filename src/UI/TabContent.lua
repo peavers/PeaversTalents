@@ -24,11 +24,18 @@ local TAB_CONFIGS = {
 				category = "mythic"
 			},
 			{
-				name = "Raid",
-				dropdownInitializer = "InitializeArchonRaidDropdown",
-				editBoxPrefix = "archonRaid",
+				name = "Heroic Raid",
+				dropdownInitializer = "InitializeArchonHeroicRaidDropdown",
+				editBoxPrefix = "archonHeroicRaid",
 				source = "archon",
-				category = "raid"
+				category = "heroic_raid"
+			},
+			{
+				name = "Mythic Raid",
+				dropdownInitializer = "InitializeArchonMythicRaidDropdown",
+				editBoxPrefix = "archonMythicRaid",
+				source = "archon",
+				category = "mythic_raid"
 			}
 		}
 	},
