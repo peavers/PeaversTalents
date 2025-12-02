@@ -12,99 +12,29 @@ function TabContent.CreateEditBox(parent, name)
 	return editBox
 end
 
--- Configuration for different tab types
-local TAB_CONFIGS = {
-	archon = {
-		sections = {
-			{
-				name = "Mythic+",
-				dropdownInitializer = "InitializeArchonMythicDropdown",
-				editBoxPrefix = "archonMythic",
-				source = "archon",
-				category = "mythic"
-			},
-			{
-				name = "Heroic Raid",
-				dropdownInitializer = "InitializeArchonHeroicRaidDropdown",
-				editBoxPrefix = "archonHeroicRaid",
-				source = "archon",
-				category = "heroic_raid"
-			},
-			{
-				name = "Mythic Raid",
-				dropdownInitializer = "InitializeArchonMythicRaidDropdown",
-				editBoxPrefix = "archonMythicRaid",
-				source = "archon",
-				category = "mythic_raid"
-			}
-		}
-	},
-	wowhead = {
-		sections = {
-			{
-				name = "Mythic+",
-				dropdownInitializer = "InitializeWowheadMythicDropdown",
-				editBoxPrefix = "wowheadMythic",
-				source = "wowhead",
-				category = "mythic"
-			},
-			{
-				name = "Raid",
-				dropdownInitializer = "InitializeWowheadRaidDropdown",
-				editBoxPrefix = "wowheadRaid",
-				source = "wowhead",
-				category = "raid"
-			},
-			{
-				name = "Misc",
-				dropdownInitializer = "InitializeWowheadMiscDropdown",
-				editBoxPrefix = "wowheadMisc",
-				source = "wowhead",
-				category = "misc"
-			}
-		}
-	},
-	icyveins = {
-		sections = {
-			{
-				name = "Mythic+",
-				dropdownInitializer = "InitializeIcyVeinsMythicDropdown",
-				editBoxPrefix = "icyveinsMythic",
-				source = "icy-veins",
-				category = "mythic"
-			},
-			{
-				name = "Raid",
-				dropdownInitializer = "InitializeIcyVeinsRaidDropdown",
-				editBoxPrefix = "icyveinsRaid",
-				source = "icy-veins",
-				category = "raid"
-			},
-			{
-				name = "Misc",
-				dropdownInitializer = "InitializeIcyVeinsMiscDropdown",
-				editBoxPrefix = "icyveinsMisc",
-				source = "icy-veins",
-				category = "misc"
-			}
-		}
-	},
-	ugg = {
-		sections = {
-			{
-				name = "Mythic+",
-				dropdownInitializer = "InitializeUggMythicDropdown",
-				editBoxPrefix = "uggMythic",
-				source = "ugg",
-				category = "mythic"
-			},
-			{
-				name = "Raid",
-				dropdownInitializer = "InitializeUggRaidDropdown",
-				editBoxPrefix = "uggRaid",
-				source = "ugg",
-				category = "raid"
-			}
+-- Configuration for Archon tab sections
+local TAB_CONFIG = {
+	sections = {
+		{
+			name = "Mythic+",
+			dropdownInitializer = "InitializeArchonMythicDropdown",
+			editBoxPrefix = "archonMythic",
+			source = "archon",
+			category = "mythic"
+		},
+		{
+			name = "Heroic Raid",
+			dropdownInitializer = "InitializeArchonHeroicRaidDropdown",
+			editBoxPrefix = "archonHeroicRaid",
+			source = "archon",
+			category = "heroic_raid"
+		},
+		{
+			name = "Mythic Raid",
+			dropdownInitializer = "InitializeArchonMythicRaidDropdown",
+			editBoxPrefix = "archonMythicRaid",
+			source = "archon",
+			category = "mythic_raid"
 		}
 	}
 }
@@ -160,40 +90,17 @@ local function CreateSection(dialog, tab, section, prevElement, isFirst)
 	return editBox
 end
 
--- Generic function to create any type of tab
-local function CreateTab(dialog, tab, tabType)
-	local config = TAB_CONFIGS[tabType]
-	if not config then
-		error("Unknown tab type: " .. tostring(tabType))
-		return
-	end
-
+-- Create the Archon tab content
+function TabContent.CreateArchonTab(dialog, tab)
 	local prevElement = nil
-	for i, section in ipairs(config.sections) do
+	for i, section in ipairs(TAB_CONFIG.sections) do
 		prevElement = CreateSection(dialog, tab, section, prevElement, i == 1)
 	end
 
 	local instructionsText = tab:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 	instructionsText:SetPoint("BOTTOM", tab, "BOTTOM", 0, 55)
-	instructionsText:SetText("Updated " .. Utils.GetFormattedUpdate(config.sections[1].source))
+	instructionsText:SetText("Updated " .. Utils.GetFormattedUpdate("archon"))
 	instructionsText:SetJustifyH("CENTER")
-end
-
--- Create specific tab functions using the generic CreateTab function
-function TabContent.CreateArchonTab(dialog, tab)
-	CreateTab(dialog, tab, "archon")
-end
-
-function TabContent.CreateWowheadTab(dialog, tab)
-	CreateTab(dialog, tab, "wowhead")
-end
-
-function TabContent.CreateIceyVeinsTab(dialog, tab)
-	CreateTab(dialog, tab, "icyveins")
-end
-
-function TabContent.CreateUggTab(dialog, tab)
-	CreateTab(dialog, tab, "ugg")
 end
 
 return TabContent

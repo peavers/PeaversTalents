@@ -91,7 +91,7 @@ local function InitializeDropdown(frame, level, source, category, editBox, newLa
 	UIDropDownMenu_EnableDropDown(frame)
 end
 
--- Update dropdown initializers with categories
+-- Archon dropdown initializers
 function DropdownManager.InitializeArchonMythicDropdown(frame, level)
 	InitializeDropdown(frame, level, "archon", "mythic", addon.exportDialog.archonMythicEdit, addon.exportDialog.archonMythicNewLabel)
 end
@@ -102,38 +102,6 @@ end
 
 function DropdownManager.InitializeArchonMythicRaidDropdown(frame, level)
 	InitializeDropdown(frame, level, "archon", "mythic_raid", addon.exportDialog.archonMythicRaidEdit, addon.exportDialog.archonMythicRaidNewLabel)
-end
-
-function DropdownManager.InitializeWowheadMythicDropdown(frame, level)
-	InitializeDropdown(frame, level, "wowhead", "mythic", addon.exportDialog.wowheadMythicEdit, addon.exportDialog.wowheadMythicNewLabel)
-end
-
-function DropdownManager.InitializeWowheadRaidDropdown(frame, level)
-	InitializeDropdown(frame, level, "wowhead", "raid", addon.exportDialog.wowheadRaidEdit, addon.exportDialog.wowheadRaidNewLabel)
-end
-
-function DropdownManager.InitializeWowheadMiscDropdown(frame, level)
-	InitializeDropdown(frame, level, "wowhead", "misc", addon.exportDialog.wowheadMiscEdit, addon.exportDialog.wowheadMiscNewLabel)
-end
-
-function DropdownManager.InitializeIcyVeinsMythicDropdown(frame, level)
-	InitializeDropdown(frame, level, "icy-veins", "mythic", addon.exportDialog.icyveinsMythicEdit, addon.exportDialog.icyveinsMythicNewLabel)
-end
-
-function DropdownManager.InitializeIcyVeinsRaidDropdown(frame, level)
-	InitializeDropdown(frame, level, "icy-veins", "raid", addon.exportDialog.icyveinsRaidEdit, addon.exportDialog.icyveinsRaidNewLabel)
-end
-
-function DropdownManager.InitializeIcyVeinsMiscDropdown(frame, level)
-	InitializeDropdown(frame, level, "icy-veins", "misc", addon.exportDialog.icyveinsMiscEdit, addon.exportDialog.icyveinsMiscNewLabel)
-end
-
-function DropdownManager.InitializeUggMythicDropdown(frame, level)
-	InitializeDropdown(frame, level, "ugg", "mythic", addon.exportDialog.uggMythicEdit, addon.exportDialog.uggMythicNewLabel)
-end
-
-function DropdownManager.InitializeUggRaidDropdown(frame, level)
-	InitializeDropdown(frame, level, "ugg", "raid", addon.exportDialog.uggRaidEdit, addon.exportDialog.uggRaidNewLabel)
 end
 
 return DropdownManager
